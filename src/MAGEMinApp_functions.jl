@@ -285,6 +285,31 @@ function get_init_param(    dtb         :: String,
 
 end
 
+"""
+    has_ns_optimizer(dtb)
+
+    True for the databases with a nullspace optimizer in MAGEMin: THERMOCALC and Stixrude & Lithgow-Bertelloni (sb11, sb21, sb24)
+"""
+function has_ns_optimizer(  dtb         :: String )
+
+    return has_dataset_choice(dtb) || dtb in ("sb11", "sb21", "sb24")
+
+end
+
+"""
+    get_optimizer(dtb, optimizer, sol)
+
+    Local optimizer passed to MAGEMin: 1 (nullspace) when "ns" is selected, the legacy solver is used (sol = 0)
+    and the database has a nullspace optimizer (`has_ns_optimizer`), 0 (NLopt) otherwise
+"""
+function get_optimizer(     dtb         :: String,
+                            optimizer,
+                            sol         :: Int64 )
+
+    return (optimizer == "ns" && sol == 0 && has_ns_optimizer(dtb)) ? 1 : 0
+
+end
+
 function string_vec_diff(solution_ph_selection, pure_ph_selection, dtb)
 
     ss_selection = string_vec_diff_ss(solution_ph_selection,    dtb)

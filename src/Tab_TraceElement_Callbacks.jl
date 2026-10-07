@@ -231,6 +231,7 @@ function Tab_TraceElement_Callbacks(app)
         State("fixed-temperature-val-id","value"        ),           # fix T
         State("fixed-pressure-val-id",  "value"         ),           # fix P
         State("solver-dropdown",        "value"         ),           # pge,lp
+        State("optimizer-dropdown",     "value"         ),           # nlopt,ns
         State("buffer-dropdown",        "value"         ),           # none,qfm,mw,qif,cco,hm,nno
         State("buffer-1-mul-id",        "value"         ),           # buffer n 1
         State("buffer-2-mul-id",        "value"         ),           # buffer n 2
@@ -272,7 +273,7 @@ function Tab_TraceElement_Callbacks(app)
                 dtb,        diagType,   tmin,       tmax,       pmin,       pmax,       e1_tmin,    e1_tmax,    e2_tmin,    e2_tmax,  
                 bulk1,      bulk2,
                 sub,        refType,    refLvl,
-                fixT,       fixP,       solver,     bufferType, bufferN1,   bufferN2,   PTpath,
+                fixT,       fixP,       solver,     optimizer,  bufferType, bufferN1,   bufferN2,   PTpath,
                 isopleths_te,  isoplethsID_te, isoplethsHid_te,  isoplethsHidID_te, field, field_zrc, field_sulf, field_fapt, field_co2sat, field_mnz, calc, cust,
 
                 isoLineStyle, isoLineWidth, isoColorLine, isoLabelSize,   
@@ -335,7 +336,8 @@ function Tab_TraceElement_Callbacks(app)
                                                                 bufferN2,
                                                                 PTpath,
                                                                 "false",
-                                                                0)
+                                                                0;
+                                                                optimizer = optimizer)
 
                 data_plot_te, annotations, txt_list, assemblage_rows_te, list_compacted_idx_te, raw_field_id_te = get_diagram_labels(   Out_XY,
                                                                             Hash_XY,

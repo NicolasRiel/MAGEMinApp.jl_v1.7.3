@@ -939,6 +939,7 @@ function Tab_PhaseDiagram_Callbacks(app)
         State("phase-selection",        "value"     ),
         State("pure-phase-selection",   "value"     ),
         State("solver-dropdown",        "value"     ),            # bulk-rock 1
+        State("optimizer-dropdown",     "value"     ),            # nlopt,ns
 
         # Sample point
         State("sample-point-p-id",      "value"     ),
@@ -964,7 +965,7 @@ function Tab_PhaseDiagram_Callbacks(app)
         State("fixed-pressure-val-id",  "value"     ),
 
         prevent_initial_call = true,
-    ) do click_info, pie_unit, sample_n_clicks, dtb, diagType, buffer, buffer_n1, buffer_n2, ph_selection, pure_ph_selection, solver,
+    ) do click_info, pie_unit, sample_n_clicks, dtb, diagType, buffer, buffer_n1, buffer_n2, ph_selection, pure_ph_selection, solver, optimizer,
             sample_p, sample_t, sample_x, dataset, cpx, limOpx, limOpxVal, scp, sas, wf,
             seismicCorMode, aspectRatioVal, seismicWaterMode, shallowCorMode, fluidAsMeltMode, anelasticCorMode,
             bulk1, bulk2, sys_unit, fixT, fixP
@@ -1000,7 +1001,7 @@ function Tab_PhaseDiagram_Callbacks(app)
             if solver == "pge"
                 slv = ", solver=1"
             elseif solver == "lp"
-                slv = ", solver=0"
+                slv = get_optimizer(dtb, optimizer, 0) == 1 ? ", solver=0, optimizer=1" : ", solver=0"
             elseif solver == "hyb"
                 slv = ", solver=2"
             end
@@ -1063,6 +1064,7 @@ function Tab_PhaseDiagram_Callbacks(app)
                                                     CaOpxLim            = CaOpxLim,
                                                     buffer              = buffer,
                                                     solver              = sol,
+                                                    optimizer           = get_optimizer(dtb, optimizer, sol),
                                                     seismicScheme       = seismicScheme,
                                                     seismicWeightFactor = seismicWeightFactor    )
                 out = deepcopy( single_point_minimization(P_kbar, T_C, MAGEMin_data;
@@ -1444,6 +1446,7 @@ function Tab_PhaseDiagram_Callbacks(app)
 
         State("buffer-dropdown",        "value"),           # none,qfm,mw,qif,cco,hm,nno
         State("solver-dropdown",        "value"),           # pge,lp
+        State("optimizer-dropdown",     "value"),           # nlopt,ns
         State("boost-mode-dropdown",    "value"),           # false,true
         State("verbose-dropdown",       "value"),           # none,light,full -> -1,0,1
         State("scp-dropdown",           "value"),           # none,light,full -> -1,0,1
@@ -1529,7 +1532,7 @@ function Tab_PhaseDiagram_Callbacks(app)
             tmin,       tmax,       pmin,       pmax,       e1_tmin,    e1_tmax,    e2_tmin,    e2_tmax,    e1_liq,     e2_liq,  e1_remain_wat,     e2_remain_wat,e1_remain,     e2_remain,      
             fixT,       fixP,
             sub,        refType,    refLvl,
-            bufferType, solver,     boost,      verbose,    scp,        sas,        wf,         seismicCorMode, aspectRatioVal, seismicWaterMode, shallowCorMode, fluidAsMeltMode, anelasticCorMode,
+            bufferType, solver,     optimizer,  boost,      verbose,    scp,        sas,        wf,         seismicCorMode, aspectRatioVal, seismicWaterMode, shallowCorMode, fluidAsMeltMode, anelasticCorMode,
             bulk1,      bulk2,      sys_unit,
             bufferN1,   bufferN2,
             mumu_oxide1, mumu_oxide2, mumu_mu1_min, mumu_mu1_max, mumu_mu2_min, mumu_mu2_max,
@@ -1633,7 +1636,8 @@ function Tab_PhaseDiagram_Callbacks(app)
                                                                                                         test,       refType,
                                                                                                         seismicScheme, seismicWeightFactor,
                                                                                                         seismicCor, aspectRatio, seismicWater, shallowCor, fluidAsMelt, anelasticCor;
-                                                                                                        mumu_oxide1_idx=mumu_oxide1_idx, mumu_oxide2_idx=mumu_oxide2_idx        )
+                                                                                                        mumu_oxide1_idx=mumu_oxide1_idx, mumu_oxide2_idx=mumu_oxide2_idx,
+                                                                                                        optimizer=optimizer        )
             if tepm == "true"
                 if dtb != "um" && dtb != "ume" && dtb != "mtl"
                     t = @elapsed Out_TE_XY,all_TE_ph = tepm_function(   diagType, dtb,
@@ -1689,7 +1693,8 @@ function Tab_PhaseDiagram_Callbacks(app)
                                                                                     test,       refType,    bid,
                                                                                     seismicScheme, seismicWeightFactor,
                                                                                     seismicCor, aspectRatio, seismicWater, shallowCor, fluidAsMelt, anelasticCor;
-                                                                                    mumu_oxide1_idx=mumu_oxide1_idx, mumu_oxide2_idx=mumu_oxide2_idx     )
+                                                                                    mumu_oxide1_idx=mumu_oxide1_idx, mumu_oxide2_idx=mumu_oxide2_idx,
+                                                                                    optimizer=optimizer     )
 
             if tepm == "true"
                 if dtb != "um" && dtb != "ume" && dtb != "mtl"
@@ -1735,7 +1740,7 @@ function Tab_PhaseDiagram_Callbacks(app)
                 sigma_mode == :absolute && (sigma_input = sigma_input ./ 100.0)
 
                 mc_opts = mc_ref_options(dtb, dataset, oxi, bufferType, Float64(bufferN1), Int64(scp), solver,
-                                          cpx, limOpx, Float64(limOpxVal), phase_selection, custW == true)
+                                          cpx, limOpx, Float64(limOpxVal), phase_selection, custW == true; optimizer = optimizer)
 
                 N_mc      = Int64(mc_n_real)
                 refLvl_mc = Int64(something(refLvl, 0)) + addedRefinementLvl

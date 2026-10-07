@@ -180,6 +180,7 @@ struct MC_ref_options
     bufferN1        :: Float64
     scp             :: Int64
     solver          :: Int64
+    optimizer       :: Int64
     mbCpx           :: Int64
     limitCaOpx      :: Int64
     CaOpxLim        :: Float64
@@ -189,7 +190,7 @@ end
 
 """
     mc_ref_options(dtb, dataset, oxi, bufferType, bufferN1, scp, solver, cpx, limOpx,
-                    limOpxVal, phase_selection, custW)
+                    limOpxVal, phase_selection, custW; optimizer = "nlopt")
 
     Build an [`MC_ref_options`](@ref) the same way `compute_new_phaseDiagram`
     builds its own `MAGEMin_Data` init parameters (via `get_init_param`),
@@ -197,13 +198,14 @@ end
     dropdown strings, `cpx` the mb-cpx switch, matching `get_init_param`'s
     own argument names). `custW` is passed straight through to
     `refine_MAGEMin`, which builds its own custom-margules list from it and
-    `AppData.customWs` internally.
+    `AppData.customWs` internally. `optimizer` is the Setup-tab optimizer dropdown value
+    ("nlopt"/"ns"), mapped by `get_optimizer`.
 """
 function mc_ref_options(dtb::String, dataset::Int64, oxi::Vector{String}, bufferType::String, bufferN1::Float64,
                          scp::Int64, solver::String, cpx, limOpx, limOpxVal::Float64,
-                         phase_selection::Union{Nothing,Vector{Int64}}, custW::Bool)
+                         phase_selection::Union{Nothing,Vector{Int64}}, custW::Bool; optimizer = "nlopt")
     mbCpx, limitCaOpx, CaOpxLim, sol = get_init_param(dtb, solver, cpx, limOpx, limOpxVal)
-    return MC_ref_options(dtb, dataset, oxi, bufferType, bufferN1, scp, sol, mbCpx, limitCaOpx, CaOpxLim,
+    return MC_ref_options(dtb, dataset, oxi, bufferType, bufferN1, scp, sol, get_optimizer(dtb, optimizer, sol), mbCpx, limitCaOpx, CaOpxLim,
                            phase_selection, custW)
 end
 
@@ -352,7 +354,8 @@ function run_monte_carlo_pt(bulk_L::Vector{Float64}, sigma_input::Vector{Float64
                                        CaOpxLim       = opts.CaOpxLim,
                                        mbCpx          = opts.mbCpx,
                                        buffer         = opts.bufferType,
-                                       solver         = opts.solver)
+                                       solver         = opts.solver,
+                                       optimizer      = opts.optimizer)
 
     for i in 1:Threads.maxthreadid()
         nb = min(ncodeunits(opts.bufferType), 9)

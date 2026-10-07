@@ -1109,6 +1109,23 @@ function Tab_Simulation()
                                             multi       = false),
                                         ]),
                                     ]),
+                                    html_div([
+                                        dbc_row([
+                                            dbc_col([ 
+                                                html_h1("Optimizer", style = Dict("textAlign" => "center","font-size" => "120%",  "marginTop" => 8)),
+                                            ]),
+                                            dbc_col([ 
+                                                dcc_dropdown(   id      = "optimizer-dropdown",
+                                                options = [
+                                                    (label = "NLopt",       value = "nlopt"),
+                                                    (label = "Nullspace",   value = "ns")
+                                                ],
+                                                value="nlopt" ,
+                                                clearable   = false,
+                                                multi       = false),
+                                            ]),
+                                        ]),
+                                    ], style = Dict("display" => "block"), id      = "display-optimizer-id"), #none, block
 
                                     dbc_row([
                                         dbc_col([ 
